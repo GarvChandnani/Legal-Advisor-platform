@@ -1,0 +1,86 @@
+[
+  {
+    "id": "law-01",
+    "category": "Indian Laws",
+    "title": "Fundamental Rights of an Indian Citizen",
+    "summary": "Overview of the basic human rights guaranteed by the Constitution of India to every citizen.",
+    "content": "The Constitution of India provides seven fundamental rights to its citizens. These are: 1. Right to Equality, 2. Right to Freedom, 3. Right against Exploitation, 4. Right to Freedom of Religion, 5. Cultural and Educational Rights, 6. Right to Constitutional Remedies, and 7. Right to Privacy. These rights are essential for the personal growth and dignity of every individual and are protected by the judiciary.",
+    "steps": [
+      "Consult a legal expert if your rights are violated.",
+      "File a Writ Petition in the High Court or Supreme Court.",
+      "Use Right to Information (RTI) to gather evidence if needed."
+    ],
+    "tags": ["Constitution", "Rights", "Civil Law"]
+  },
+  {
+    "id": "tax-01",
+    "category": "Taxation",
+    "title": "Understanding GST: Goods and Services Tax",
+    "summary": "A simplified guide to the comprehensive indirect tax structure in India.",
+    "content": "GST is a single tax on the supply of goods and services, right from the manufacturer to the consumer. Credits of input taxes paid at each stage will be available in the subsequent stage of value addition, which makes GST essentially a tax only on value addition at each stage. The final consumer will thus bear only the GST charged by the last dealer in the supply chain, with set-off benefits at all the previous stages.",
+    "steps": [
+      "Check if your business turnover exceeds the threshold limit.",
+      "Register for GST on the official portal.",
+      "Issue GST compliant invoices.",
+      "File monthly or quarterly returns (GSTR-1, GSTR-3B)."
+    ],
+    "tags": ["GST", "Taxation", "Business"]
+  },
+  {
+    "id": "business-01",
+    "category": "Business & Compliance",
+    "title": "How to Register a Startup in India",
+    "summary": "Step-by-step process to incorporate your business and get recognized by DPIIT.",
+    "content": "Registering a startup in India involves choosing the right business structure (Private Limited, LLP, etc.) and registering with the Ministry of Corporate Affairs (MCA). After incorporation, you can apply for 'Startup India' recognition to avail tax benefits and easy compliance.",
+    "steps": [
+      "Choose a unique business name.",
+      "Obtain Digital Signature Certificate (DSC) and Director Identification Number (DIN).",
+      "Apply for Incorporation on the MCA portal (SPICe+ form).",
+      "Register on the Startup India portal for DPIIT recognition."
+    ],
+    "tags": ["Startup", "MCA", "Compliance"]
+  },
+  {
+    "id": "consumer-01",
+    "category": "Consumer Rights",
+    "title": "Filing a Complaint with Consumer Court",
+    "summary": "Learn how to protect yourself against unfair trade practices and defective products.",
+    "content": "Under the Consumer Protection Act, 2019, any consumer can file a complaint against a seller or service provider for unfair trade practices or deficiency in service. This can be done via the E-Daakhil portal or at the District/State/National Commission depending on the value of the claim.",
+    "steps": [
+      "Send a formal notice to the seller giving them 15 days to resolve the issue.",
+      "If unresolved, draft a complaint mentioning the facts and your demand for compensation.",
+      "Submit the complaint on the E-Daakhil portal or offline at the relevant Commission.",
+      "Pay the nominal court fee based on the claim amount."
+    ],
+    "tags": ["Consumer Protection", "Legal Help"]
+  },
+  {
+    "id": "tax-02",
+    "category": "Taxation",
+    "title": "Income Tax Filing Basics for Salaried Employees",
+    "summary": "A guide for individual taxpayers to file their annual Income Tax Returns (ITR).",
+    "content": "Salaried employees in India are required to file their ITR if their income exceeds the basic exemption limit. Most employees use ITR-1 (Sahaj). Form 16, which is provided by the employer, is the most crucial document for this process.",
+    "steps": [
+      "Gather your Form 16 and other investment proofs.",
+      "Login to the Income Tax e-Filing portal.",
+      "Choose the relevant Assessment Year and ITR form.",
+      "Verify the pre-filled data and submit.",
+      "E-verify your return using Aadhaar OTP."
+    ],
+    "tags": ["Income Tax", "ITR", "Finance"]
+  },
+  {
+    "id": "labor-01",
+    "category": "Employment & Labor Laws",
+    "title": "Maternity Benefit Act: Rights of Working Women",
+    "summary": "Everything you need to know about maternity leave and benefits for women employees in India.",
+    "content": "The Maternity Benefit (Amendment) Act, 2017, increased the duration of paid maternity leave available for women employees from the existing 12 weeks to 26 weeks. This applies to all establishments employing 10 or more persons. The act also mandates a crèche facility for every establishment employing 50 or more employees.",
+    "steps": [
+      "Notify your employer at least 7 weeks before the expected date of delivery.",
+      "Submit medical certificates as proof of pregnancy.",
+      "Calculate your leave: You can take up to 8 weeks before delivery and 18 weeks after.",
+      "Check if your company provides additional benefits under CSR or HR policies."
+    ],
+    "tags": ["Labor Law", "Maternity", "Working Women"]
+  }
+]
