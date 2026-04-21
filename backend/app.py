@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import os
+import shutil
+import tempfile
 
 from models.nlp_engine import NLPEngine
 
@@ -23,6 +25,7 @@ engine = NLPEngine(os.path.join(base_path, "data", "articles.json"))
 class ChatRequest(BaseModel):
     message: str
     history: List[dict] = []
+    doc_context: Optional[str] = None
 
 class ChatResponse(BaseModel):
     response: str
@@ -60,13 +63,41 @@ def search(q: str = Query(...)):
     results = engine.search_articles(q, top_n=5)
     return results
 
+@app.post("/upload-document")
+async def upload_document(file: UploadFile = File(...)):
+    if not file.filename.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+    
+    try:
+        # Create a temporary file to store the upload
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            shutil.copyfileobj(file.file, tmp)
+            tmp_path = tmp.name
+        
+        # Extract text
+        text = engine.extract_text_from_pdf(tmp_path)
+        
+        # Summarize
+        summary = engine.summarize(text)
+        
+        # Clean up
+        os.unlink(tmp_path)
+        
+        return {
+            "filename": file.filename,
+            "summary": summary,
+            "extracted_text": text
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
+
 @app.post("/lawbot", response_model=ChatResponse)
 def lawbot_chat(request: ChatRequest):
-    # RAG: Search for context
+    # RAG: Search for context from articles
     context_articles = engine.search_articles(request.message, top_n=2)
     
-    # Generate response
-    response_text = engine.get_lawbot_response(request.message, context_articles)
+    # Generate response, passing document context if available
+    response_text = engine.get_lawbot_response(request.message, context_articles, request.doc_context)
     
     return {
         "response": response_text,

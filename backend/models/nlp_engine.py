@@ -13,6 +13,12 @@ except ImportError:
     OPENROUTER_AVAILABLE = False
 
 try:
+    import PyPDF2
+    PYPDF2_AVAILABLE = True
+except ImportError:
+    PYPDF2_AVAILABLE = False
+
+try:
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.metrics.pairwise import cosine_similarity
     SKLEARN_AVAILABLE = True
@@ -72,12 +78,43 @@ class NLPEngine:
             matches.sort(key=lambda x: x[0], reverse=True)
             return [m[1] for m in matches[:top_n]]
 
-    def summarize(self, text: str, max_sentences: int = 2) -> str:
-        # Simple extractive summarization: take the first few sentences
+    def summarize(self, text: str, max_sentences: int = 3) -> str:
+        # If OpenRouter is available, use it for a better summary
+        if OPENROUTER_AVAILABLE and self.api_key:
+            try:
+                system_prompt = "You are a legal document summarizer. Summarize the following document in a few bullet points, focusing on key terms, parties involved, and important dates or obligations. Keep it concise."
+                with OpenRouter(api_key=self.api_key) as client:
+                    response = client.chat.send(
+                        model="openrouter/free",
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": text[:8000]} # Limit text length for free models
+                        ]
+                    )
+                    return response.choices[0].message.content
+            except Exception as e:
+                print(f"Summarization Error: {e}")
+        
+        # Fallback simple extractive summarization
         sentences = re.split(r'(?<=[.!?]) +', text)
         return " ".join(sentences[:max_sentences])
 
-    def get_lawbot_response(self, query: str, context_articles: List[Dict[str, Any]]) -> str:
+    def extract_text_from_pdf(self, file_path: str) -> str:
+        if not PYPDF2_AVAILABLE:
+            return "PDF processing library not available."
+        
+        text = ""
+        try:
+            with open(file_path, 'rb') as f:
+                reader = PyPDF2.PdfReader(f)
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+            return text.strip()
+        except Exception as e:
+            print(f"Error extracting PDF: {e}")
+            return f"Error extracting text from PDF: {str(e)}"
+
+    def get_lawbot_response(self, query: str, context_articles: List[Dict[str, Any]], doc_context: str = None) -> str:
         if not OPENROUTER_AVAILABLE or not self.api_key:
             # Fallback to template if API is unavailable
             if not context_articles:
@@ -89,11 +126,15 @@ class NLPEngine:
         # Prepare context for the AI
         context_str = "\n\n".join([f"Article: {a['title']}\nContent: {a['content']}" for a in context_articles])
         
+        doc_info = f"\n\nUploaded Document Context:\n{doc_context}" if doc_context else ""
+
         system_prompt = f"""You are 'LawBot', a helpful legal assistant for Indian citizens. 
 Your goal is to explain legal, tax, and business concepts in simple, non-technical language.
 Use the following articles from our database as your primary source of truth:
 {context_str}
+{doc_info}
 
+If an uploaded document is provided, prioritize answering based on that document while still using the articles for broader context.
 If the context doesn't contain the answer, provide general legal information but state clearly that it's not found in the official articles. 
 Always include this disclaimer at the end: 'Disclaimer: LawBot provides general legal information, not professional legal advice.'
 Be concise and helpful."""
@@ -101,7 +142,7 @@ Be concise and helpful."""
         try:
             with OpenRouter(api_key=self.api_key) as client:
                 response = client.chat.send(
-                    model="google/gemma-3-4b-it:free",
+                    model="openrouter/free",
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": query}

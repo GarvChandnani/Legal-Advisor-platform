@@ -8,6 +8,8 @@ const LawBot = () => {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [docContext, setDocContext] = useState(null);
+  const [fileName, setFileName] = useState('');
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -28,7 +30,11 @@ const LawBot = () => {
       const res = await fetch('http://localhost:8000/lawbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input, history: messages })
+        body: JSON.stringify({ 
+          message: input, 
+          history: messages,
+          doc_context: docContext
+        })
       });
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'bot', text: data.response }]);
@@ -37,6 +43,42 @@ const LawBot = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setLoading(true);
+    setFileName(file.name);
+    setMessages(prev => [...prev, { role: 'user', text: `Uploaded: ${file.name}` }]);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('http://localhost:8000/upload-document', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      
+      setDocContext(data.extracted_text);
+      setMessages(prev => [...prev, { 
+        role: 'bot', 
+        text: `I've analyzed the document: ${file.name}. Here is a summary:\n\n${data.summary}\n\nYou can now ask me questions about this document.` 
+      }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'bot', text: "Error uploading document. Please try again." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearDoc = () => {
+    setDocContext(null);
+    setFileName('');
+    setMessages(prev => [...prev, { role: 'bot', text: "Document context cleared. We are back to general legal queries." }]);
   };
 
   return (
@@ -72,9 +114,18 @@ const LawBot = () => {
           </div>
 
           <div style={chatFooter}>
+            <label style={uploadBtn}>
+              <input 
+                type="file" 
+                accept=".pdf" 
+                onChange={handleFileUpload} 
+                style={{display:'none'}}
+              />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v10.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.31 2.69 6 6 6s6-2.69 6-6V6h-1.5z"/></svg>
+            </label>
             <input 
               type="text" 
-              placeholder="Ask anything..." 
+              placeholder={docContext ? "Ask about doc..." : "Ask anything..."} 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
@@ -82,6 +133,11 @@ const LawBot = () => {
             />
             <button onClick={sendMessage} style={sendBtn}>&rarr;</button>
           </div>
+          {fileName && (
+            <div style={fileIndicator}>
+              📄 {fileName} <span onClick={clearDoc} style={{cursor:'pointer', marginLeft:'5px'}}>✕</span>
+            </div>
+          )}
           <div style={disclaimer}>
             LawBot provides general information, not legal advice.
           </div>
@@ -118,7 +174,9 @@ const botMsgStyle = { backgroundColor: 'white', padding: '10px 15px', borderRadi
 const userMsgStyle = { backgroundColor: 'var(--primary-blue)', color: 'white', padding: '10px 15px', borderRadius: '15px 15px 2px 15px', fontSize: '0.9rem' };
 const chatFooter = { padding: '15px', borderTop: '1px solid #eee', display: 'flex', gap: '10px' };
 const chatInput = { flex: 1, border: '1px solid #ddd', borderRadius: '20px', padding: '8px 15px', outline: 'none' };
-const sendBtn = { backgroundColor: 'var(--primary-blue)', color: 'white', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer' };
+const sendBtn = { backgroundColor: 'var(--primary-blue)', color: 'white', border: 'none', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+const uploadBtn = { color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px' };
+const fileIndicator = { fontSize: '0.75rem', color: 'var(--primary-blue)', padding: '5px 15px', backgroundColor: '#eef2f6', display: 'flex', justifyContent: 'space-between' };
 const disclaimer = { fontSize: '0.65rem', color: '#999', textAlign: 'center', padding: '5px', backgroundColor: '#fff' };
 
 export default LawBot;
