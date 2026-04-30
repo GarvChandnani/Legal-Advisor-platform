@@ -8,7 +8,7 @@ export default function ArticlePage({ params }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/articles/${id}`)
+    fetch(`/api/articles/${id}`)
       .then(res => res.json())
       .then(data => {
         setArticle(data);

@@ -8,7 +8,7 @@ export default function CategoryPage({ params }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/articles?category=${name}`)
+    fetch(`/api/articles?category=${name}`)
       .then(res => res.json())
       .then(data => {
         setArticles(data);

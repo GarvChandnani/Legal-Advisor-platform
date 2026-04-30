@@ -27,7 +27,7 @@ const LawBot = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/lawbot', {
+      const res = await fetch('/api/lawbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -57,7 +57,7 @@ const LawBot = () => {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:8000/upload-document', {
+      const res = await fetch('/api/upload-document', {
         method: 'POST',
         body: formData
       });

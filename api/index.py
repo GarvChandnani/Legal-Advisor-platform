@@ -22,6 +22,10 @@ app.add_middleware(
 base_path = os.path.dirname(os.path.abspath(__file__))
 engine = NLPEngine(os.path.join(base_path, "data", "articles.json"))
 
+# Create router with /api prefix
+from fastapi import APIRouter
+router = APIRouter(prefix="/api")
+
 class ChatRequest(BaseModel):
     message: str
     history: List[dict] = []
@@ -31,22 +35,22 @@ class ChatResponse(BaseModel):
     response: str
     suggested_articles: List[dict]
 
-@app.get("/")
+@router.get("/")
 def read_root():
     return {"message": "Legal Advisor App API is running"}
 
-@app.get("/categories")
+@router.get("/categories")
 def get_categories():
     categories = sorted(list(set(a['category'] for a in engine.articles)))
     return categories
 
-@app.get("/articles")
+@router.get("/articles")
 def get_articles(category: Optional[str] = None):
     if category:
         return [a for a in engine.articles if a['category'].lower() == category.lower()]
     return engine.articles
 
-@app.get("/articles/{article_id}")
+@router.get("/articles/{article_id}")
 def get_article(article_id: str):
     article = next((a for a in engine.articles if a['id'] == article_id), None)
     if not article:
@@ -58,12 +62,12 @@ def get_article(article_id: str):
     
     return {**article, "related": related}
 
-@app.get("/search")
+@router.get("/search")
 def search(q: str = Query(...)):
     results = engine.search_articles(q, top_n=5)
     return results
 
-@app.post("/upload-document")
+@router.post("/upload-document")
 async def upload_document(file: UploadFile = File(...)):
     if not file.filename.endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
@@ -91,7 +95,7 @@ async def upload_document(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
 
-@app.post("/lawbot", response_model=ChatResponse)
+@router.post("/lawbot", response_model=ChatResponse)
 def lawbot_chat(request: ChatRequest):
     # RAG: Search for context from articles
     context_articles = engine.search_articles(request.message, top_n=2)
@@ -103,6 +107,9 @@ def lawbot_chat(request: ChatRequest):
         "response": response_text,
         "suggested_articles": context_articles
     }
+
+# Include the router
+app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn

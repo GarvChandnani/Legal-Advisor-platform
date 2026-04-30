@@ -9,12 +9,12 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/categories")
+    fetch("/api/categories")
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error(err));
 
-    fetch("http://localhost:8000/articles")
+    fetch("/api/articles")
       .then(res => res.json())
       .then(data => setFeatured(data.slice(0, 3)))
       .catch(err => console.error(err));
@@ -24,7 +24,7 @@ export default function Home() {
     const q = e.target.value;
     setSearchQuery(q);
     if (q.length > 2) {
-      fetch(`http://localhost:8000/search?q=${q}`)
+      fetch(`/api/search?q=${q}`)
         .then(res => res.json())
         .then(data => setSearchResults(data))
         .catch(err => console.error(err));
